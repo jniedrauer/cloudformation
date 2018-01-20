@@ -73,6 +73,11 @@ Resources:
               --region ${AWS::Region}
       SecurityGroupIds:
         - sg-ab8fafd8
+      Tags:
+        - Key: Name
+          Value: SimpleAdTest
+        - Key: Group
+          Value: adjoin
 
 Parameters:
   AdAdminPassword:
