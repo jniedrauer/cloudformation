@@ -43,6 +43,7 @@ Resources:
               command: /tmp/cfn-init-default.sh
       AWS::CloudFormation::Authentication:
         S3AccessCredentials:
+          buckets: !Ref CfnBucket
           type: S3
           accessKeyId: !Select
             - 0
@@ -60,7 +61,7 @@ Resources:
       InstanceType: t2.nano
       UserData:
         "Fn::Base64": !Sub |
-          #!/bin/bash -xe
+          #!/bin/bash -x
           export PATH=$PATH:/opt/aws/bin
           cfn-init -v \
               --stack ${AWS::StackName} \
