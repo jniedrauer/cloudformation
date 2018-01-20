@@ -1,0 +1,87 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: >
+  Simple AD and a test EC2 instance
+
+Resources:
+
+  SimpleAdService:
+    Type: AWS::DirectoryService::SimpleAD
+    Properties:
+      Description: SSH key based auth for Linux
+      Name: ad.jniedrauer.com
+      Password: !Ref AdAdminPassword
+      ShortName: ad
+      Size: Small
+      VpcSettings:
+        SubnetIds:
+          - subnet-74fc5010
+          - subnet-a4320b88
+        VpcId: vpc-ea6b8c92
+
+  TestInstance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          default:
+            - "defaults"
+        defaults:
+          files:
+            /tmp/cfn-init-default.sh:
+              source: !Join
+                - "/"
+                - - https://s3.amazonaws.com
+                  - !Ref CfnBucket
+                  - provisioning-scripts/cfn-init-default.sh
+              mode: "000700"
+              owner: "root"
+              group: "root"
+          commands:
+            1_execute:
+              command: /tmp/cfn-init-default.sh
+      AWS::CloudFormation::Authentication:
+        S3AccessCredentials:
+          type: S3
+          accessKeyId: !Select
+            - 0
+            - !Ref Ec2ProvisionKeys
+          secretKey: !Select
+            - 1
+            - !Ref Ec2ProvisionKeys
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT5M
+    Properties:
+      SubnetId: subnet-74fc5010
+      ImageId: ami-428aa838
+      InstanceType: t2.nano
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash -xe
+          export PATH=$PATH:/opt/aws/bin
+          cfn-init -v \
+              --stack ${AWS::StackName} \
+              --resource TestInstance \
+              --region ${AWS::Region}
+          cfn-signal -e $? \
+              --stack ${AWS::StackName} \
+              --resource TestInstance \
+              --region ${AWS::Region}
+      SecurityGroupIds:
+        - sg-ab8fafd8
+
+Parameters:
+  AdAdminPassword:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: AdAdminPassword
+    NoEcho: true
+  Ec2ProvisionKeys:
+    Type: AWS::SSM::Parameter::Value<List<String>>
+    Default: Ec2ProvisionIamKeypair
+    NoEcho: true
+  CfnBucket:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: CfnBucket
