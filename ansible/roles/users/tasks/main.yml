@@ -1,0 +1,7 @@
+---
+- include_tasks: add_user.yml
+  vars:
+    random_hash: '{{ lookup("password", "/dev/null length=15") }}'
+  with_items: '{{ users }}'
+  loop_control:
+    loop_var: user

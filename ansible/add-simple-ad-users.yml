@@ -1,0 +1,7 @@
+---
+- hosts: adtest
+  become: no
+
+  roles:
+    - ldap
+    - users

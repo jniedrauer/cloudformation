@@ -1,0 +1,21 @@
+---
+- name: Create Linux admins group
+  ldap_entry:
+    params: '{{ simple_ad.auth }}'
+    dn: 'cn=Linux Admins,cn=Users,{{ simple_ad.dc }}'
+    objectClass: group
+    attributes:
+      description: Linux Administrators
+
+- name: Create public key attribute
+  ldap_entry:
+    params: '{{ simple_ad.auth }}'
+    dn: 'cn=SSHPublicKey,cn=Schema,cn=Configuration,{{ simple_ad.dc }}'
+    objectClass:
+      - attributeSchema
+      - top
+    attributes:
+      attributeID: 1.3.6.1.4.1.24552.500.1.1.1.14
+      attributeSyntax: 2.5.5.10
+      name: SSHPublicKey
+      lDAPDisplayName: sshPublicKey

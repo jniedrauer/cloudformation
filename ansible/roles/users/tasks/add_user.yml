@@ -1,0 +1,41 @@
+---
+- name: Create user
+  # Note: this will not modify an existing user
+  ldap_entry:
+    params: '{{ simple_ad.auth }}'
+    dn: 'cn={{ user.username }},cn=Users,{{ simple_ad.dc }}'
+    objectClass:
+      - top
+      - person
+      - organizationalPerson
+      - user
+      - posixAccount
+      - shadowAccount
+    attributes:
+      userAccountControl: 512
+      pwdLastSet: 0
+      userPassword: '{SSHA}{{ random_hash|password_hash("sha512") }}'
+  register: create_user
+
+- name: Add user to groups
+  ldap_attr:
+    params: '{{ simple_ad.auth }}'
+    dn: '{{ item }},{{ simple_ad.dc }}'
+    name: member
+    values:
+      - 'cn={{ user.username }},cn=Users,{{ simple_ad.dc }}'
+  with_items: '{{ user.groups }}'
+
+- name: Add user public keys
+  ldap_attr:
+    params: '{{ simple_ad.auth }}'
+    dn: 'cn={{ user.username }},cn=Users,{{ simple_ad.dc }}'
+    name: sshPublicKey
+    values:
+      - '{{ item }},{{ simple_ad.dc }}'
+  with_items: '{{ user.public_keys }}'
+
+- name: Output temporary password
+  debug:
+    msg: 'New user: {{ user.username }}; Temporary password: {{ random_hash }}'
+  when: create_user.changed

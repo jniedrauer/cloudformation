@@ -1,0 +1,4 @@
+dn: cn=User,cn=Schema,cn=Configuration,dc=ad,dc=jniedrauer,dc=com
+changetype: modify
+add: mayContain
+mayContain: sshPublicKey
