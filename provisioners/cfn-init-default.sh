@@ -9,11 +9,9 @@ main() {
     add_user \
         jniedrauer \
         'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDZxuzrQfHmOhXXadbDXzcSrNe0pCKx7/DLCYOk2cWgr jniedrauer@homeserver'
-    sed -i'' 's/DNS1=.*/DNS1=10.11.125.59/' /etc/sysconfig/network-scripts/ifcfg*
 
     install_packages
 
-    printf '\n10.11.125.59\tad.jniedrauer.com\n' >>/etc/hosts
     #join_realm
     #enable_services
     set_sudoers
@@ -33,9 +31,8 @@ install_packages() {
 }
 
 join_realm() {
-#    joiner_password=$(aws ssm get-parameters --names AdAdminPassword --query 'Parameters[].[Value]' --output text)
-    realm join --unattended --verbose \
-        -U Administrator@AD.JNIEDRAUER.COM 10.11.125.59
+    realm join --verbose \
+        -U Administrator@AD.JNIEDRAUER.LOCAL ad.jniedrauer.local
 }
 
 enable_services() {
