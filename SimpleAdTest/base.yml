@@ -38,6 +38,15 @@ Resources:
               mode: "000700"
               owner: "root"
               group: "root"
+            /usr/sbin/get-ldap-publickeys:
+              source: !Join
+                - "/"
+                - - https://s3.amazonaws.com
+                  - !Ref CfnBucket
+                  - provisioning-scripts/get-ldap-publickeys.sh
+              mode: "000755"
+              owner: "root"
+              group: "root"
           commands:
             1_execute:
               command: /tmp/cfn-init-default.sh
