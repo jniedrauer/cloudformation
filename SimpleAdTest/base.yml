@@ -38,12 +38,45 @@ Resources:
           Value: public1
       VpcId: !Ref TestVpc
 
+  PublicRoutetable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref TestVpc
+      Tags:
+        - Key: Name
+          Value: PublicRoute
+
   Igw:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
           Value: publicigw
+
+  IgwAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref Igw
+      VpcId: !Ref TestVpc
+
+  PublicRouteDefault:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRoutetable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref Igw
+
+  RouteTableAssoc0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRoutetable
+      SubnetId: !Ref PublicSubnet0
+
+  RouteTableAssoc1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRoutetable
+      SubnetId: !Ref PublicSubnet1
 
   PrivateZone:
     Type: AWS::Route53::HostedZone
@@ -174,6 +207,12 @@ Resources:
           Value: SimpleAdTest
         - Key: Group
           Value: adjoin
+    Condition: CreateEc2
+
+Conditions:
+  CreateEc2: !Equals
+    - !Ref CreateEc2
+    - true
 
 Parameters:
   AdAdminPassword:
@@ -187,3 +226,6 @@ Parameters:
   CfnBucket:
     Type: AWS::SSM::Parameter::Value<String>
     Default: CfnBucket
+  CreateEc2:
+    Type: String
+    Default: true
