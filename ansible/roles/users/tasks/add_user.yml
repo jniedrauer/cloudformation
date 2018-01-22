@@ -30,9 +30,9 @@
   ldap_attr:
     params: '{{ simple_ad.auth }}'
     dn: 'cn={{ user.username }},cn=Users,{{ simple_ad.dc }}'
-    name: sshPublicKey
+    name: SSHPublicKey
     values:
-      - '{{ item }},{{ simple_ad.dc }}'
+      - '{{ item }}'
   with_items: '{{ user.public_keys }}'
 
 - name: Output temporary password

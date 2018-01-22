@@ -15,7 +15,23 @@
       - attributeSchema
       - top
     attributes:
-      attributeID: 1.3.6.1.4.1.24552.500.1.1.1.14
+      attributeID: 1.3.6.1.4.1.24552.500.1.1.1.13
       attributeSyntax: 2.5.5.10
       name: SSHPublicKey
       lDAPDisplayName: sshPublicKey
+
+- name: Copy LDIF to remote server
+  template:
+    src: add-ssh-key-attribute.ldif
+    dest: /tmp/add-ssh-key-attribute.ldif
+
+- name: Run LDIF
+  expect:
+    command: >
+      ldapmodify -a -x
+        -D '{{ simple_ad.auth.bind_dn }}' -W
+        -H '{{ simple_ad.auth.server_uri }}'
+        -f /tmp/add-ssh-key-attribute.ldif
+    responses:
+      (?i)LDAP Password: '{{ simple_ad.auth.bind_pw }}'
+  failed_when: no
