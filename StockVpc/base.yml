@@ -120,7 +120,20 @@ Resources:
         - VPCId: !Ref Vpc
           VPCRegion: us-east-1
 
+  SsmZoneInfo:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: TestingVpcZoneInfo
+      Description: Hosted Zone ID and name for stock testing VPC
+      Type: StringList
+      Value: !Join
+        - ','
+        - - !Ref PrivateZone
+          - !Ref VpcZoneName
+
 Parameters:
+  StackName:
+    Type: String
   CidrPrefix:
     Type: String
     Default: 10.12

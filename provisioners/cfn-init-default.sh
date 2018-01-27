@@ -13,13 +13,25 @@ PACKAGES=(
 )
 
 main() {
-    IFS=',' read -r -a users <<< "$1"
+    hostname="$1"
+    IFS=',' read -r -a users <<< "$2"
     for user in "${users[@]}"; do
         add_user "$user"
     done
 
+    set_hostname
     install_packages
     set_sudoers
+}
+
+set_hostname() {
+    sed -i'' "s/^HOSTNAME=.*/HOSTNAME=$hostname/" /etc/sysconfig/network
+    echo "$hostname" >/etc/hostname
+    if test -f /etc/cloud/cloud.cfg; then
+        sed -i'' "s/^preserve_hostname:.*/preserve_hostname: true/" \
+            /etc/cloud/cloud.cfg
+    fi
+    hostname "$hostname"
 }
 
 install_packages() {

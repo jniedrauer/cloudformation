@@ -26,7 +26,11 @@ Resources:
               group: "root"
           commands:
             1_execute:
-              command: !Sub /tmp/cfn-init-default.sh "${Ec2Users}"
+              command: !Join
+                - ' '
+                - - /tmp/cfn-init-default.sh
+                  - !Join ['.', [!Ref Name, !Select [1, !Ref ZoneInfo]]]
+                  - !Sub "'${Ec2Users}'"
       AWS::CloudFormation::Authentication:
         S3AccessCredentials:
           buckets: !Ref CfnBucket
@@ -61,7 +65,7 @@ Resources:
         - !Ref SecurityGroup
       Tags:
         - Key: Name
-          Value: !Ref Name
+          Value: !Join ['.', [!Ref Name, !Select [1, !Ref ZoneInfo]]]
         - Key: Group
           Value: !Ref Group
 
@@ -89,3 +93,6 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: Ec2Users
     NoEcho: true
+  ZoneInfo:
+    Type: AWS::SSM::Parameter::Value<List<String>>
+    Default: TestingVpcZoneInfo
