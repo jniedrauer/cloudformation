@@ -43,14 +43,16 @@ update_stack() {
     aws cloudformation update-stack \
         --stack-name "$stack" \
         --template-body "file://$wd/$stack/base.yml" \
-        --capabilities CAPABILITY_NAMED_IAM
+        --capabilities CAPABILITY_NAMED_IAM \
+        --parameters "ParameterKey=StackName,ParameterValue=$stack"
 }
 
 create_stack() {
     aws cloudformation create-stack \
         --stack-name "$stack" \
         --template-body "file://$wd/$stack/base.yml" \
-        --capabilities CAPABILITY_NAMED_IAM
+        --capabilities CAPABILITY_NAMED_IAM \
+        --parameters "ParameterKey=StackName,ParameterValue=$stack"
 }
 
 main
