@@ -31,7 +31,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
-                Resource: !Sub "arn:aws:s3:::${BucketName}/provisioning-scripts/*"
+                Resource: !Sub "arn:aws:s3:::${BucketName}/provisioners/*"
       UserName: !Ref Ec2ProvisionUser
 
   Ec2ProvisionIamUserKeypair:
@@ -54,7 +54,7 @@ Resources:
 Parameters:
   BucketName:
     Type: String
-    Default: jniedrauer-cfn-resources
+    Default: jniedrauer-cfn-infrastructure
   Ec2ProvisionUser:
     Type: String
     Default: Ec2Provision
