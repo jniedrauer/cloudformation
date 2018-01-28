@@ -12,7 +12,8 @@ Resources:
       AWS::CloudFormation::Init:
         configSets:
           default:
-            - "defaults"
+            - defaults
+            - taskrunner
         defaults:
           files:
             /tmp/cfn-init-default.sh:
@@ -31,6 +32,31 @@ Resources:
                 - - /tmp/cfn-init-default.sh
                   - !Join ['.', [!Ref Name, !Select [1, !Ref ZoneInfo]]]
                   - !Sub "'${Ec2Users}'"
+        taskrunner:
+          files:
+            /usr/local/lib/task-runner/TaskRunner-1.0.jar:
+              source: https://s3.amazonaws.com/datapipeline-us-east-1/us-east-1/software/latest/TaskRunner/TaskRunner-1.0.jar
+              mode: "000644"
+              owner: "root"
+              group: "root"
+            /etc/systemd/system/task-runner.service:
+              content: Sub |
+                [Unit]
+                Description=AWS Task Runner
+                After=NetworkManager.service network.service
+
+                [Service]
+                ExecStart=/usr/bin/java -jar /usr/local/lib/task-runner/TaskRunner-1.0.jar \
+                    --output /var/log/task-runner \
+                    --workerGroup ${WorkerGroup} \
+                    --region us-east-1
+              mode: "000644"
+              owner: "root"
+              group: "root"
+          commands:
+            1_install: yum -y install java-1.8.0-openjdk
+            2_enable: systemctl enable task-runner
+            3_start: systemctl start task-runner
       AWS::CloudFormation::Authentication:
         S3AccessCredentials:
           buckets: !Ref CfnBucket
@@ -74,6 +100,8 @@ Parameters:
   Name:
     Type: String
   Group:
+    Type: String
+  WorkerGroup:
     Type: String
   Ami:
     Type: String

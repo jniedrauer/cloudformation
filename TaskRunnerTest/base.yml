@@ -66,6 +66,7 @@ Resources:
       Parameters:
         Name: TaskRunner0
         Group: TaskRunners
+        WorkerGroup: wg-0000
         Ami: ami-428aa838
         SecurityGroup: !Ref InstanceSg
         IamInstanceProfile: !Ref TaskRunnerInstanceProfile

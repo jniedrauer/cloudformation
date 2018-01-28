@@ -48,12 +48,39 @@ Resources:
               StringValue: !Ref DataPipelineRole
             - Key: scheduleType
               StringValue: ondemand
-        - Id: ShellCommandActivityExecutor
-          Name: Process tasks on EC2
+        - Id: ShellCommandActivityExecutor0
+          Name: Process tasks on wg-0000
           Fields:
             - Key: type
               StringValue: ShellCommandActivity
             - Key: workerGroup
-              StringValue: wg-1234
+              StringValue: wg-0000
             - Key: command
-              StringValue: echo #{myInputCommand} >~/test.log
+              StringValue: echo $(date) #{myInputCommand} >>/var/log/task-runner/test.log
+        - Id: ShellCommandActivityExecutor1
+          Name: Process tasks on wg-0001
+          Fields:
+            - Key: type
+              StringValue: ShellCommandActivity
+            - Key: workerGroup
+              StringValue: wg-0001
+            - Key: command
+              StringValue: echo foo1 >>/var/log/task-runner/test.log
+        - Id: ShellCommandActivityExecutor2
+          Name: Process tasks on wg-0002
+          Fields:
+            - Key: type
+              StringValue: ShellCommandActivity
+            - Key: workerGroup
+              StringValue: wg-0002
+            - Key: command
+              StringValue: echo foo2 >>/var/log/task-runner/test.log
+        - Id: ShellCommandActivityExecutor3
+          Name: Process tasks on wg-0003
+          Fields:
+            - Key: type
+              StringValue: ShellCommandActivity
+            - Key: workerGroup
+              StringValue: wg-0003
+            - Key: command
+              StringValue: echo foo3 >>/var/log/task-runner/test.log
