@@ -110,7 +110,7 @@ Parameters:
     Type: String
   InstanceType:
     Type: String
-    Default: t2.nano
+    Default: t2.micro
   SecurityGroup:
     Type: String
   IamInstanceProfile:
