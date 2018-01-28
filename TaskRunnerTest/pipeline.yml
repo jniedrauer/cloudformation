@@ -48,6 +48,8 @@ Resources:
               StringValue: !Ref DataPipelineRole
             - Key: scheduleType
               StringValue: ondemand
+            - Key: maxActiveInstances
+              StringValue: 5
         - Id: ShellCommandActivityExecutor0
           Name: Process tasks on wg-0000
           Fields:
