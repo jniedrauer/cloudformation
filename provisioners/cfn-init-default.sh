@@ -36,12 +36,12 @@ set_hostname() {
 }
 
 install_packages() {
-    test -n "${PACKAGES:-}" \
-        && yum -y install "${PACKAGES[@]}" \
-        || return 0
+    test -n "${PACKAGES:-}" || return 0
+    yum -y install "${PACKAGES[@]}"
 }
 
 enable_services() {
+    test -n "${SERVICES[@]:-}" || return 0
     for service in "${SERVICES[@]:-}"; do
         systemctl enable "$service"
         systemctl start "$service"
@@ -49,6 +49,7 @@ enable_services() {
 }
 
 set_sudoers() {
+    test -n "${ADMIN_GROUPS[@]:-}" || return 0
     for group in "${ADMIN_GROUPS[@]:-}"; do
         (umask 337; touch "/etc/sudoers.d/$group";)
         printf '%%%s ALL=(ALL) NOPASSWD: ALL\n' "$group" >>"/etc/sudoers.d/$group"

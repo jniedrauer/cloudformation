@@ -59,8 +59,14 @@ Resources:
       Roles:
         - TaskRunnerRole
 
+  DataPipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${CfnBucket}/${StackName}/pipeline.yml'
+
   TaskRunnerInstance0:
     Type: AWS::CloudFormation::Stack
+    DependsOn: DataPipeline
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${CfnBucket}/${StackName}/ec2.yml'
       Parameters:
@@ -75,10 +81,22 @@ Resources:
           - !Ref PublicSubnets
         CfnBucket: !Ref CfnBucket
 
-  DataPipeline:
+  TaskRunnerInstance1:
     Type: AWS::CloudFormation::Stack
+    DependsOn: DataPipeline
     Properties:
-      TemplateURL: !Sub 'https://s3.amazonaws.com/${CfnBucket}/${StackName}/pipeline.yml'
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${CfnBucket}/${StackName}/ec2.yml'
+      Parameters:
+        Name: TaskRunner1
+        Group: TaskRunners
+        WorkerGroup: wg-0001
+        Ami: ami-428aa838
+        SecurityGroup: !Ref InstanceSg
+        IamInstanceProfile: !Ref TaskRunnerInstanceProfile
+        Subnet: !Select
+          - 1
+          - !Ref PublicSubnets
+        CfnBucket: !Ref CfnBucket
 
 Parameters:
   AdminCidr:

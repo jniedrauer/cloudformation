@@ -40,7 +40,7 @@ Resources:
               owner: "root"
               group: "root"
             /etc/systemd/system/task-runner.service:
-              content: Sub |
+              content: !Sub |
                 [Unit]
                 Description=AWS Task Runner
                 After=NetworkManager.service network.service
@@ -54,9 +54,12 @@ Resources:
               owner: "root"
               group: "root"
           commands:
-            1_install: yum -y install java-1.8.0-openjdk
-            2_enable: systemctl enable task-runner
-            3_start: systemctl start task-runner
+            1_install:
+              command: yum -y install java-1.8.0-openjdk
+            2_enable:
+              command: systemctl enable task-runner
+            3_start:
+              command: systemctl start task-runner
       AWS::CloudFormation::Authentication:
         S3AccessCredentials:
           buckets: !Ref CfnBucket
