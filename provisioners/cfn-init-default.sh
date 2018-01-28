@@ -21,6 +21,7 @@ main() {
 
     set_hostname
     install_packages
+    enable_services
     set_sudoers
 }
 

@@ -1,0 +1,59 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: >
+  Data Pipelines
+
+Resources:
+
+  DataPipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - datapipeline.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: '/data-pipeline/'
+      Policies:
+        - PolicyName: DataPipelineShit
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'datapipeline:*'
+                Resource:
+                  - '*'
+
+  Ec2ExecuteCmdsPipeline:
+    Type: AWS::DataPipeline::Pipeline
+    Properties:
+      Name: Ec2ExecuteCmds
+      Description: Execute commands on EC2
+      Activate: true
+      PipelineObjects:
+        - Id: Default
+          Name: Default
+          Fields:
+            - Key: type
+              StringValue: Default
+            - Key: failureAndRerunMode
+              StringValue: CASCADE
+            - Key: role
+              StringValue: !Ref DataPipelineRole
+            - Key: scheduleType
+              StringValue: ondemand
+        - Id: ShellCommandActivityExecutor
+          Name: Process tasks on EC2
+          Fields:
+            - Key: type
+              StringValue: ShellCommandActivity
+            - Key: workerGroup
+              StringValue: wg-1234
+            - Key: command
+              StringValue: echo #{myInputCommand} >~/test.log

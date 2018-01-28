@@ -26,6 +26,39 @@ Resources:
           Value: TaskRunnerTestServers
       VpcId: !Ref VpcId
 
+  TaskRunnerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: TaskRunnerRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: '/data-pipeline/'
+      Policies:
+        - PolicyName: DataPipelineShit
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'datapipeline:*'
+                Resource:
+                  - '*'
+
+  TaskRunnerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    DependsOn: TaskRunnerRole
+    Properties:
+      Path: '/data-pipelines/'
+      Roles:
+        - TaskRunnerRole
+
   TaskRunnerInstance0:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -35,10 +68,16 @@ Resources:
         Group: TaskRunners
         Ami: ami-428aa838
         SecurityGroup: !Ref InstanceSg
+        IamInstanceProfile: !Ref TaskRunnerInstanceProfile
         Subnet: !Select
           - 0
           - !Ref PublicSubnets
         CfnBucket: !Ref CfnBucket
+
+  DataPipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${CfnBucket}/${StackName}/pipeline.yml'
 
 Parameters:
   AdminCidr:

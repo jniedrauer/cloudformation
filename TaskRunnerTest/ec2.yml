@@ -63,6 +63,7 @@ Resources:
               --region ${AWS::Region}
       SecurityGroupIds:
         - !Ref SecurityGroup
+      IamInstanceProfile: !Ref IamInstanceProfile
       Tags:
         - Key: Name
           Value: !Join ['.', [!Ref Name, !Select [1, !Ref ZoneInfo]]]
@@ -80,6 +81,8 @@ Parameters:
     Type: String
     Default: t2.nano
   SecurityGroup:
+    Type: String
+  IamInstanceProfile:
     Type: String
   Subnet:
     Type: String
