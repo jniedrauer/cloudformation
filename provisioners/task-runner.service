@@ -1,0 +1,9 @@
+[Unit]
+Description=AWS Task Runner
+After=NetworkManager.service network.service
+
+[Service]
+ExecStart=/usr/bin/java -jar /usr/local/lib/task-runner/TaskRunner-1.0.jar \
+    --output /var/log/task-runner \
+    --workerGroup wg-1234 \
+    --region us-east-1
