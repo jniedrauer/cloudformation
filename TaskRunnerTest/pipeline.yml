@@ -57,7 +57,7 @@ Resources:
             - Key: scheduleType
               StringValue: ondemand
             - Key: maxActiveInstances
-              StringValue: 5
+              StringValue: 10
         - Id: ShellCommandActivityExecutor0
           Name: Process tasks on wg-0000
           Fields:
