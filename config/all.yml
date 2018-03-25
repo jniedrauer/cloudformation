@@ -1,0 +1,29 @@
+---
+# AWS static configuration
+regions:
+  us-east-1:
+    AZs:
+      - a
+      - b
+      - c
+      - e
+    ELB_zone: Z35SXDOTRQ7X7K
+  us-west-2:
+    AZs:
+      - a
+      - b
+      - c
+    ELB_zone: Z1H1FL5HABSF5
+
+AMIs:
+  centos7:
+    '1801_01':
+      us-east-1: ami-4bf3d731
+      us-west-2: ami-a042f4d8
+  ecs:
+    '2017.09':
+      us-east-1: ami-cb17d8b6
+      us-west-2: ami-baa236c2
+
+access_whitelist:
+  - 76.183.216.168/32
