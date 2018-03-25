@@ -1,14 +1,30 @@
+"""A base VPC for personal projects"""
 
 
-from troposphere import Join, Parameter, Ref, Template
-from troposphere.ssm import Parameter as SsmParameter
-from troposphere.cloudformation import Stack
-from troposphere.iam import User
-from troposphere.iam import Policy as TropospherePolicy
+from troposphere import (
+    Parameter,
+    Ref,
+    Template,
+)
+from troposphere.ec2 import (
+    SecurityGroup,
+    SecurityGroupRule,
+)
+from troposphere.ssm import (
+    Parameter as SsmParameter,
+)
+from troposphere.iam import (
+    User,
+    Policy as TropospherePolicy,
+)
 
-from awacs.aws import Allow, Action, Statement, Policy
+from awacs.aws import (
+    Allow,
+    Action,
+    Statement,
+    Policy,
+)
 
-from resources.cfn import stack_url
 from resources.vpc import VpcWrapper
 from meta.config import Config
 
@@ -23,7 +39,7 @@ def render() -> str:
 
     t.add_description('Base VPC.')
 
-    stack_name = t.add_parameter(Parameter(
+    t.add_parameter(Parameter(
         'StackName',
         Description='Cloudformation stack name',
         Type='String',
@@ -92,6 +108,36 @@ def render() -> str:
                 )
             ),
         ],
+    ))
+
+    common_access_sg = t.add_resource(SecurityGroup(
+        'CommonSecurityGroup',
+        GroupDescription=f'{config.env.title()} common access security group',
+        VpcId=Ref(vpc.vpc),
+        SecurityGroupEgress=[
+            SecurityGroupRule(
+                CidrIp='0.0.0.0/0',
+                FromPort='-1',
+                IpProtocol='-1',
+                ToPort='-1',
+            )
+        ],
+        SecurityGroupIngress=[
+            SecurityGroupRule(
+                CidrIp=i,
+                FromPort='22',
+                IpProtocol='tcp',
+                ToPort='22',
+            )
+            for i in config.access_whitelist
+        ]
+    ))
+
+    t.add_resource(SsmParameter(
+        'CommonAccessSgParameter',
+        Name=f'/{config.env.title()}/CommonAccessSg',
+        Type='String',
+        Value=Ref(common_access_sg)
     ))
 
     return t.to_yaml(long_form=True)
