@@ -63,7 +63,6 @@ class EcsWrapper(Wrapper):
             InstanceType=size,
             SecurityGroups=security_groups,
             IamInstanceProfile=Ref(self.instance_profile),
-            KeyName='blockchyp_infra', # TODO: Remove
             Metadata=Metadata(
                 Init(dict(
                     config=InitConfig(
