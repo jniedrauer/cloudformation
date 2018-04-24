@@ -5,20 +5,18 @@ set -eu
 stack="${1%/}"
 wd="$(pwd)"
 build=build
+env=${ENV:-dev}
 
-. "$wd/config/${ENV:-dev}.cfg"
+# shellcheck source=config/dev.cfg
+. "$wd/config/$env.cfg"
 
 main() {
     render_templates
-
     validate_templates
-
     diff_templates
-
     cfn_sync
 
     cfn_stack=${stack##*/}
-
     if stack_exists; then
         update_stack
     else
@@ -28,6 +26,18 @@ main() {
 
 render_templates() {
     meta/render.py -i "$wd/$stack" -o "$build/$stack"
+    if [ -d "$wd/$stack/lambda" ]; then
+        rsync -r "$wd/$stack/lambda/" /tmp/lambda/
+        find "$build/$stack" -type f -name "*yml" -print0 \
+            | while IFS= read -r -d '' f; do
+                mv "$f" /tmp/.cfn_render_tmp
+                aws cloudformation package \
+                    --template "/tmp/.cfn_render_tmp" \
+                    --s3-bucket "$CFN_BUCKET" \
+                    --s3-prefix lambda_artifacts \
+                    --output-template-file "$f"
+            done
+    fi
 }
 
 validate_templates() {
@@ -70,19 +80,27 @@ stack_exists() {
 }
 
 update_stack() {
+    params="$(meta/get_params_file.py --name "$cfn_stack" --env "$env")"
+    # shellcheck disable=SC2064
+    trap "rm -f $params" EXIT
+
     aws cloudformation update-stack \
         --stack-name "$cfn_stack" \
         --template-body "file://$build/$stack/main.yml" \
         --capabilities CAPABILITY_NAMED_IAM \
-        --parameters "ParameterKey=StackName,ParameterValue=$stack"
+        --parameters "file://$params"
 }
 
 create_stack() {
+    params="$(meta/get_params_file.py --name "$cfn_stack" --env "$env")"
+    # shellcheck disable=SC2064
+    trap "rm -f $params" EXIT
+
     aws cloudformation create-stack \
         --stack-name "$cfn_stack" \
         --template-body "file://$build/$stack/main.yml" \
         --capabilities CAPABILITY_NAMED_IAM \
-        --parameters "ParameterKey=StackName,ParameterValue=$stack"
+        --parameters "file://$params"
 }
 
 main
