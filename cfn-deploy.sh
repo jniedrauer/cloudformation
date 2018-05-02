@@ -16,7 +16,7 @@ main() {
     diff_templates
     cfn_sync
 
-    cfn_stack=${stack##*/}
+     cfn_stack=${stack##*/}
     if stack_exists; then
         update_stack
     else
